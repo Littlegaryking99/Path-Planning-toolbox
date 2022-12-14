@@ -643,7 +643,8 @@ def main():
     # x = mod.addVar(lb = 0, ub = 3, name = "x")
     # y = mod.addVar(lb = 0, ub = 3, name = "y")
     # mod.addConstr(x + y <= 3)
-    prob.addConstraint(x + y <= 3)
+    prob += x + y <= 3
+    # prob.addConstraint(x + y <= 3)
     # obj = x ** 2 + y
     
     # x = prob.mod.addVar(lb = 1, ub = 3, name = "x")
