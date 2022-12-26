@@ -467,6 +467,10 @@ class QpProblem:
         self._variables = []
         self._variable_ids = {}
         self.result = None
+        self.P = None
+        self.q = None
+        self.G = None
+        self.h = None
         if self.solver == "Gurobi":
             self.mod = gp.Model("qp")
 
@@ -494,24 +498,10 @@ class QpProblem:
         lpcopy.objective = self.objective
         lpcopy.constraints = self.constraints.copy()
 
-    def addVariable(self, name, lowb, upb):
-        if self.solver == "Gurobi":
-            if name == "x":
-                x = self.mod.addVar(lb = lowb, ub = upb, name = name)
-            if name == "y":
-                y = self.mod.addVar(lb = lowb, ub = upb, name = name)
-                
-        
-    # def addVariable(self, variable):
-    #     if self.solver == "Gurobi":
-    #         if variable.name == "x":
-    #             x = self.mod.addVar(lb = variable.lowbound, ub = variable.upbound, name = variable.name)
-    #         elif variable.name == "y":
-    #             y = self.mod.addVar(lb = variable.lowbound, ub = variable.upbound, name = variable.name)
-    #         self.mod.update()
-    #     if variable.hash not in self._variable_ids:
-    #         self._variables.append(variable)
-    #         self._variable_ids[variable.hash] = variable
+    def addVariable(self, variable):
+        if variable.hash not in self._variable_ids:
+            self._variables.append(variable)
+            self._variable_ids[variable.hash] = variable
     
     def addVariables(self, variables):
         for v in variables:
@@ -561,22 +551,49 @@ class QpProblem:
                 name = None
             self.objective = obj
             self.objective.name = name
+    
+    def getVariableNum(self):
+        varlist = []
+        for i in self._variables:
+            varlist.append(i.name[0])
+        tmplist = list({}.fromkeys(varlist).keys())
+        return tmplist
 
     def solve(self, solver=None, mod = None, **kwargs):
         if not (solver):
             solver = self.solver
         # time it
         self.startClock()
-        if self.solver == "Gurobi":
-            mod.Params.OutputFlag = 0
-            mod.optimize()
-            status = [mod.getVars()[0].X, mod.getVars()[1].X]
-        else:
-            return
+        self.variables()
+        list1 = self.getVariableNum()
+        numofvar = len(list1)
+        numofmul = str(self.objective).count("**")
+        self.P = np.zeros((numofvar, numofvar))
+        self.q = np.zeros((numofvar, 1))
+        flag = 0
+        muldict = dict()
+        for k,v in self.objective.items():
+            muldict[k.name] = v
+        for i in range(numofvar):
+            indexP = str(list1[i] + "**2")
+            indexq = str(list1[i])
+            if indexP in muldict:
+                self.P[i][i] = muldict[indexP]
+            if str(list1[i]) in muldict:
+                self.q[i][0] = muldict[indexq]
+        print(self.P)
+        print(self.q)
+        # print(muldict)
+        # if self.solver == "Gurobi":
+        #     mod.Params.OutputFlag = 0
+        #     mod.optimize()
+        #     status = [mod.getVars()[0].X, mod.getVars()[1].X]
+        # else:
+        #     return
             # status = solver.actualSolve(self, **kwargs)
         self.stopClock()
         self.solver = solver
-        return status
+        return
 
     def startClock(self):
         self.solutionTime = -time.time()
@@ -585,8 +602,6 @@ class QpProblem:
         self.solutionTime += time.time()
 
     def __iadd__(self, other):
-        if self.solver == "Gurobi":
-            self.mod.addConstr(other)
         if isinstance(other, tuple):
             other, name = other
         else:
@@ -599,7 +614,7 @@ class QpProblem:
             self.addConstraint(other, name)
         elif isinstance(other, QpExpression):
             if self.objective is not None:
-                warnings.warn("Overwriting previously set objective.")
+                print("Overwriting previously set objective.")
             self.objective = other
             if name is not None:
                 self.objective.name = name
@@ -633,17 +648,24 @@ def main():
     # f = e ** 2
     # x = QpElement(name = 'x', value = 5)
     # print(x.ToDict())
-    prob = QpProblem("myProblem", "Gurobi")
+    prob = QpProblem("myProblem", "quadprog")
     # x = prob.addVariable("x", 0, 3, mod)
     # y = prob.addVariable("y", 0, 1, mod)
-    prob.addVariable("x", 0, 3)
-    prob.addVariable("y", 0, 1)
-    prob.mod.update()
-    print(prob.mod)
+    x = QpVariable("x", 0, 3)
+    y = QpVariable("y", 0, 1)
+    z = QpVariable("z", 1,)
+    prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5 + z * 3
+    # print(prob.objective.toDict())
+    # print(str(prob.objective))
+    # print(str(prob.objective).count("**"))
+    # prob.addVariable("x", 0, 3)
+    # prob.addVariable("y", 0, 1)
+    # prob.mod.update()
+    # print(prob.mod)
     # x = mod.addVar(lb = 0, ub = 3, name = "x")
     # y = mod.addVar(lb = 0, ub = 3, name = "y")
     # mod.addConstr(x + y <= 3)
-    prob += x + y <= 3
+    # prob += x + y <= 3
     # prob.addConstraint(x + y <= 3)
     # obj = x ** 2 + y
     
@@ -653,6 +675,7 @@ def main():
     # mod.addConstr(x + y <= 3)
     # print(prob.mod)
     # prob += x ** 2 + y
+    prob.solve()
     # prob += x + y <= 3
     # sol = prob.solve()
     # print(sol)
