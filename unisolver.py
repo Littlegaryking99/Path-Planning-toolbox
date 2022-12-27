@@ -356,7 +356,7 @@ class QpConstraint(QpExpression):
 
     def __str__(self):
         s = QpExpression.__str__(self, 0)
-        if self.s is not None:
+        if self.s is not None: 
             s += " " + self.rel[self.s] + " " + str(-self.constant)
         return s
 
@@ -471,6 +471,7 @@ class QpProblem:
         self.q = None
         self.G = None
         self.h = None
+        self.numofc = 0
         if self.solver == "Gurobi":
             self.mod = gp.Model("qp")
 
@@ -529,11 +530,8 @@ class QpProblem:
         self.addConstraint(constraint, name)
 
     def addConstraint(self, constraint, name=None, mod = None):
-        if self.solver == "Gurobi":
-            mod.addConstr(constraint)
-        elif self.solver == "quadprog":
-            self.addquadprogConstraint
         self.constraints[name] = constraint
+        return
         # self.modifiedConstraints.append(constraint)
         # self.addVariables(list(constraint.keys()))
 
@@ -570,9 +568,10 @@ class QpProblem:
         numofmul = str(self.objective).count("**")
         self.P = np.zeros((numofvar, numofvar))
         self.q = np.zeros((numofvar, 1))
-        flag = 0
+        self.G = np.zeros((self.numofc, numofvar))
+        self.h = np.zeros((self.numofc, 1))
         muldict = dict()
-        for k,v in self.objective.items():
+        for k, v in self.objective.items():
             muldict[k.name] = v
         for i in range(numofvar):
             indexP = str(list1[i] + "**2")
@@ -581,8 +580,29 @@ class QpProblem:
                 self.P[i][i] = muldict[indexP]
             if str(list1[i]) in muldict:
                 self.q[i][0] = muldict[indexq]
-        print(self.P)
-        print(self.q)
+        for i in range(self.numofc):
+            print(i)
+        for i in range(self.numofc):
+            index = "c" + str(i)
+            tmpdict = dict()
+            s = QpExpression(self.constraints[index], 0)
+            eq = self.constraints[index].s
+            print(eq)
+            for c, d in s.items():
+                tmpdict[c.name] = d
+            print(tmpdict)
+            for j in range(numofvar):
+                if str(list1[j]) in tmpdict:
+                    self.G[i][j] = -eq * tmpdict[str(list1[j])]
+                    self.h[i][0] = eq * self.constraints[index].constant
+        print(self.G)
+        print(self.h)
+        # print(str(self.constraints["c0"]))
+        # s = QpExpression.__str__(self.constraints["c0"], 0)
+        # print(str(s))
+        # s1 = QpExpression.__str__(self.constraints["c1"], 0)
+        # print(str(s1))
+
         # print(muldict)
         # if self.solver == "Gurobi":
         #     mod.Params.OutputFlag = 0
@@ -611,7 +631,9 @@ class QpProblem:
         elif other is False:
             raise TypeError("A False object cannot be passed as a constraint")
         elif isinstance(other, QpConstraint):
+            name = "c" + str(self.numofc)
             self.addConstraint(other, name)
+            self.numofc += 1
         elif isinstance(other, QpExpression):
             if self.objective is not None:
                 print("Overwriting previously set objective.")
@@ -655,6 +677,8 @@ def main():
     y = QpVariable("y", 0, 1)
     z = QpVariable("z", 1,)
     prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5 + z * 3
+    prob += x + y <= 3
+    prob += x + z >= 2
     # print(prob.objective.toDict())
     # print(str(prob.objective))
     # print(str(prob.objective).count("**"))
