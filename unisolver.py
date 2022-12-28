@@ -4,7 +4,7 @@ import time
 import numpy as np
 import matplotlib
 import quadprog
-from quadprog import solve_qp
+from quadprog import solve_qp as quad_solve
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -12,10 +12,12 @@ from dynamics import Dyn
 from agent import Agent
 from obstacle import Sphere, Ellipsoid, Wall
 import gurobipy as gp
+from gurobipy import GRB
 from gurobipy import *
 from goal import Goal
 from sim_plots import Cbf_data, Clf_data, ColorManager
 from params import *
+import scipy.sparse as spa
 from scipy.sparse import csr_matrix, lil_matrix
 import constants as const
 import math
@@ -581,28 +583,21 @@ class QpProblem:
             if str(list1[i]) in muldict:
                 self.q[i][0] = muldict[indexq]
         for i in range(self.numofc):
-            print(i)
-        for i in range(self.numofc):
             index = "c" + str(i)
             tmpdict = dict()
             s = QpExpression(self.constraints[index], 0)
             eq = self.constraints[index].s
-            print(eq)
             for c, d in s.items():
                 tmpdict[c.name] = d
-            print(tmpdict)
             for j in range(numofvar):
                 if str(list1[j]) in tmpdict:
                     self.G[i][j] = -eq * tmpdict[str(list1[j])]
                     self.h[i][0] = eq * self.constraints[index].constant
-        print(self.G)
-        print(self.h)
-        # print(str(self.constraints["c0"]))
-        # s = QpExpression.__str__(self.constraints["c0"], 0)
-        # print(str(s))
-        # s1 = QpExpression.__str__(self.constraints["c1"], 0)
-        # print(str(s1))
-
+        if self.solver == "quadprog":
+            sol = self.quadSolve(numofvar)
+        elif self.solver == "Gurobi":
+            sol = self.gurobiSolve(numofvar)
+        print(sol)
         # print(muldict)
         # if self.solver == "Gurobi":
         #     mod.Params.OutputFlag = 0
@@ -614,6 +609,43 @@ class QpProblem:
         self.stopClock()
         self.solver = solver
         return
+
+    def quadSolve(self, numofvar = 0):
+        qp_G = self.P
+        qp_a = -self.q.flatten()
+        qp_C = -self.G.T
+        qp_b = -self.h.flatten()
+        meq = 0
+        sol = quad_solve(qp_G, qp_a, qp_C, qp_b, meq)[0].reshape(numofvar, 1)
+        return sol
+
+    def gurobiSolve(self, numofvar = 0):
+        ubs, lbs = np.zeros((numofvar,1)), np.zeros((numofvar,1))
+        model = gp.Model()
+        model.Params.OutputFlag = 0
+        identity = spa.eye(numofvar)
+        flag = 0
+        for item in self._variables:
+            if isinstance(item, QpVariable):
+                ubs[flag] = item.getUb()
+                lbs[flag] = item.getLb()
+                flag += 1
+        ubs.reshape((numofvar,1))
+        lbs.reshape((numofvar,1))
+        t = model.addMVar(numofvar, lb = -GRB.INFINITY, ub = GRB.INFINITY, vtype = GRB.CONTINUOUS)
+        model.update()
+        ineqConstr, lbConstr, ubConstr = None, None, None
+        ineqConstr = model.addMConstr(self.G, t, GRB.LESS_EQUAL, self.h)
+        lb_constr = model.addMConstr(identity, t, GRB.GREATER_EQUAL, lbs)
+        ub_constr = model.addMConstr(identity, t, GRB.LESS_EQUAL, ubs)
+        objective = 0.5 * (t @ self.P @ t) + self.q.flatten() @ t
+        model.setObjective(objective, sense = GRB.MINIMIZE)
+        model.update()
+        model.optimize()
+        status = []
+        for i in range(numofvar):
+            status.append(model.getVars()[i].X)
+        return status
 
     def startClock(self):
         self.solutionTime = -time.time()
@@ -636,7 +668,7 @@ class QpProblem:
             self.numofc += 1
         elif isinstance(other, QpExpression):
             if self.objective is not None:
-                print("Overwriting previously set objective.")
+                warnings.warn("Overwriting previously set objective.")
             self.objective = other
             if name is not None:
                 self.objective.name = name
@@ -671,14 +703,13 @@ def main():
     # x = QpElement(name = 'x', value = 5)
     # print(x.ToDict())
     prob = QpProblem("myProblem", "quadprog")
-    # x = prob.addVariable("x", 0, 3, mod)
-    # y = prob.addVariable("y", 0, 1, mod)
     x = QpVariable("x", 0, 3)
     y = QpVariable("y", 0, 1)
-    z = QpVariable("z", 1,)
-    prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5 + z * 3
+    prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
     prob += x + y <= 3
-    prob += x + z >= 2
+    prob += x + y >= 2
+    prob.solve()
+    print(prob.solutionTime)
     # print(prob.objective.toDict())
     # print(str(prob.objective))
     # print(str(prob.objective).count("**"))
@@ -699,7 +730,6 @@ def main():
     # mod.addConstr(x + y <= 3)
     # print(prob.mod)
     # prob += x ** 2 + y
-    prob.solve()
     # prob += x + y <= 3
     # sol = prob.solve()
     # print(sol)
