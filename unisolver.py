@@ -121,7 +121,7 @@ class QpVariable(QpElement):
 
     def getUb(self):
         """
-        >>> x = QpVariable('x', lowbound = -10, upbound =  10)
+        >>> x = QpVariable('x', lowbound = -10, upbound = 10)
         >>> x.getUb()
         10
         """
@@ -132,6 +132,18 @@ class QpVariable(QpElement):
         self.upbound = up
     
 class QpExpression(dict):
+    """
+    A linear(quadratic) combination of class: QpVariable
+    >>> x = QpVariable('x', lowbound = -10, upbound =  10)
+    >>> y = QpExpression([(x, 2)], constant = 3, name = "c1")
+    >>> y
+    2*x + 3
+    >>> x_name = ['x_0', 'x_1', 'x_2']
+    >>> x = [QpVariable(x_name[i], lowbound = 0, upbound = 10) for i in range(3) ]
+    >>> c = QpExpression([(x[0],1), (x[1],-3), (x[2],4)], constant = 3)
+    >>> c
+    1*x_0 + -3*x_1 + 4*x_2 + 3
+    """
     def __init__(self, e=None, constant=0, name=None):
         self.name = name
         if e is None:
@@ -334,6 +346,16 @@ class QpExpression(dict):
     to_dict = toDict
 
 class QpConstraint(QpExpression):
+    """
+    Combination of QpExpression and constant
+    >>> x = QpVariable('x', lowbound = -10, upbound =  10)
+    >>> y = QpExpression([(x, 2)], constant = 3, name = "c1")
+    >>> z = QpConstraint(e = y, s = 0, rhs = 5)
+    >>> print(z)
+    2*x = 2
+    >>> z
+    2*x + -2 = 0
+    """
     def __init__(self, e=None, s=0, name = None, rhs=None):
         QpExpression.__init__(self, e, name=name)
         if rhs is not None:
@@ -460,6 +482,24 @@ class QpConstraintVar(QpElement):
         return self.constraint.value()
 
 class QpProblem:
+    """
+    Main Structure of QP Problem.
+    >>> prob = QpProblem("myProblem", "quadprog")
+    >>> x = QpVariable("x", 0, 3)
+    >>> y = QpVariable("y", 0, 1)
+    >>> prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
+    >>> prob.objective
+    1*x + 2*x**2 + 5*y + 5*y**2 + 0
+    >>> prob += x + y <= 3
+    >>> prob += x + y >= 2
+    >>> prob.constraints["c0"]
+    1*x + 1*y + -3 <= 0
+    >>> print(prob.constraints["c0"])
+    x + y <= 3
+    >>> prob.solve()
+    [[2.]
+     [0.]]
+    """
     def __init__(self, name="NoName", solver = None):
         self.objective = None
         self.constraints = dict()
@@ -691,25 +731,17 @@ class QpProblem:
 
 
 def main():
-    # mod = gp.Model("qp")
-    # x_name = ['x_0', 'x_1', 'x_2']
-    # x_name = ['x', 'y', 'x**2']
-    # x = [QpVariable(x_name[i], lowbound = 0, upbound = 10) for i in range(3) ]
-    # c = QpExpression([ (x[0],1), (x[1],-3), (x[2],4)])
-    # d = 3
-
-    # e = QpElement('e', value = 3)
-    # f = e ** 2
-    # x = QpElement(name = 'x', value = 5)
-    # print(x.ToDict())
-    prob = QpProblem("myProblem", "quadprog")
-    x = QpVariable("x", 0, 3)
-    y = QpVariable("y", 0, 1)
-    prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
-    prob += x + y <= 3
-    prob += x + y >= 2
-    prob.solve()
-    print(prob.solutionTime)
+    doctest.testmod(verbose = True)
+    # prob = QpProblem("myProblem", "quadprog")
+    # x = QpVariable("x", 0, 3)
+    # y = QpVariable("y", 0, 1)
+    # prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
+    # prob += x + y <= 3
+    # prob += x + y >= 2
+    # print(prob.constraints["c0"])
+    # prob.solve()
+    # print(prob.objective)
+    # print(prob.solutionTime)
     # print(prob.objective.toDict())
     # print(str(prob.objective))
     # print(str(prob.objective).count("**"))
@@ -734,7 +766,7 @@ def main():
     # sol = prob.solve()
     # print(sol)
     
-    # doctest.testmod(verbose = True)
+    
 
 if __name__ == '__main__':
     start_time = time.time()
