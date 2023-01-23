@@ -1,0 +1,11 @@
+Optimization problems
+=====
+
+Linear Programming problems
+------------
+TBD
+
+Quareatic Programming problems
+------------
+TBD
+

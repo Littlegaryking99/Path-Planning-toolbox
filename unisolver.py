@@ -504,7 +504,10 @@ class QpProblem:
         self.objective = None
         self.constraints = dict()
         self.name = name
-        self.solver = solver
+        if solver in self.solvers == True:
+            self.solver = solver
+        else: 
+            print("This is not a valid solver in unisolver")
         self.solvers = ['Gurobi','quadprog']
         self._variables = []
         self._variable_ids = {}
@@ -592,12 +595,15 @@ class QpProblem:
             self.objective = obj
             self.objective.name = name
     
-    def getVariableNum(self):
+    def getVariables(self):
         varlist = []
         for i in self._variables:
             varlist.append(i.name[0])
         tmplist = list({}.fromkeys(varlist).keys())
         return tmplist
+
+    def numOfPow(self, exp):
+        return str(exp).count("**")
 
     def solve(self, solver=None, mod = None, **kwargs):
         if not (solver):
@@ -605,9 +611,9 @@ class QpProblem:
         # time it
         self.startClock()
         self.variables()
-        list1 = self.getVariableNum()
+        list1 = self.getVariables()
         numofvar = len(list1)
-        numofmul = str(self.objective).count("**")
+        numofmul = self.numOfPow(self.objective)
         self.P = np.zeros((numofvar, numofvar))
         self.q = np.zeros((numofvar, 1))
         self.G = np.zeros((self.numofc, numofvar))
@@ -731,15 +737,15 @@ class QpProblem:
 
 
 def main():
-    doctest.testmod(verbose = True)
-    # prob = QpProblem("myProblem", "quadprog")
-    # x = QpVariable("x", 0, 3)
-    # y = QpVariable("y", 0, 1)
-    # prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
-    # prob += x + y <= 3
-    # prob += x + y >= 2
-    # print(prob.constraints["c0"])
-    # prob.solve()
+    # doctest.testmod(verbose = True)
+    # for i in range(2000):
+    prob = QpProblem("myProblem", "Gurobi")
+    x = QpVariable("x", 0, 3)
+    y = QpVariable("y", 0, 1)
+    prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
+    prob += x + y <= 3
+    prob += x + y >= 2
+    prob.solve()
     # print(prob.objective)
     # print(prob.solutionTime)
     # print(prob.objective.toDict())
