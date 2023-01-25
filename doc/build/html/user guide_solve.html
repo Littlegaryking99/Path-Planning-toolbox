@@ -43,7 +43,7 @@
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_initialization.html">Initialize a QP problem by unisolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_solver%20config.html">Configure a solver in unisolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_variables.html">Specify variables for QP problems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user%20guide_objective.html">Objective function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user%20guide_objective.html">How to add objective function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_constraint.html">How to add a constraint</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">How to solve the model</a></li>
 </ul>
@@ -78,21 +78,35 @@
              
   <section id="how-to-solve-the-model">
 <h1>How to solve the model<a class="headerlink" href="#how-to-solve-the-model" title="Permalink to this headline"></a></h1>
-<p>In this section we will show how to solve the model.</p>
-<p>After the user have specified the variables, objective
-function and constraints, they can solve the
-QP problem:</p>
+<p>After user have input the variables, objective function and constraints, they can solve the model in
+a vary simple way. In this section we will show how to solve the model.</p>
+<p>For most cases, the model can be solved by <em>solve</em> function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
-<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
-<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span>
-<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">3</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">2</span>
 <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="c1">#[[2.]</span>
+<span class="c1"># [0.]]</span>
 </pre></div>
 </div>
-<p>Then unisolver will transform the problem into suitable
-format for corresponding solver and solve the problem.</p>
-<p>User can input coefficients to specify what kind
-of output they want for further use.</p>
+<p>For different solvers, unisolver will provide different data types due to corresponding solver’s settings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prob</span> <span class="o">=</span> <span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;Gurobi&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="c1">#[1.9999558636043262, 4.413643994956694e-05]</span>
+</pre></div>
+</div>
+<p>If the problem is infeasible, it will print out default error massage for each solver.</p>
+<p>After user understands the fundemental functions of unisolver, let’s see some case studies about
+how unisolver can be used to solve real-life problems.</p>
 </section>
 
 

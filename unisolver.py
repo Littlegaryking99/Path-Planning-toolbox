@@ -27,6 +27,11 @@ import doctest
 from collections import Counter
 from collections.abc import Iterable
 
+def listsolvers():
+    solverlist = ["quadprog", "Gurobi"]
+    print(solverlist)
+    return 
+
 class QpElement:
     """
     >>> x = QpElement(name = 'x', value = 5)
@@ -90,7 +95,7 @@ class QpVariable(QpElement):
     """
     >>> x = QpVariable('x', lowbound = -10, upbound =  10)
     """
-    def __init__(self, name, lowbound = None, upbound = None, value = 0):
+    def __init__(self, name = "NoName", lowbound = None, upbound = None, value = 0):
         QpElement.__init__(self, name, value)
         self.name = name
         self.lowbound = lowbound
@@ -113,7 +118,7 @@ class QpVariable(QpElement):
 
     def getLb(self):
         """
-        >>> x = QpVariable('x', lowbound = -10, upbound =  10)
+        >>> x = QpVariable('x', lowbound = -10, upbound = 10)
         >>> x.getLb()
         -10
         """
@@ -150,6 +155,7 @@ class QpExpression(dict):
             e = {}
         if isinstance(e, QpExpression):
             # Will not copy the name
+            # print("isexpression")
             self.constant = e.constant
             super().__init__(list(e.items()))
         elif isinstance(e, dict):
@@ -462,10 +468,7 @@ class QpConstraint(QpExpression):
 
     def toDict(self):
         return dict(
-            sense=self.sense,
-            pi=self.pi,
             constant=self.constant,
-            name=self.name,
             coefficients=QpExpression.toDict(self),
         )
 
@@ -503,11 +506,8 @@ class QpProblem:
     def __init__(self, name="NoName", solver = None):
         self.objective = None
         self.constraints = dict()
-        self.name = name
-        if solver in self.solvers == True:
-            self.solver = solver
-        else: 
-            print("This is not a valid solver in unisolver")
+        self.name = name    
+        self.solver = solver
         self.solvers = ['Gurobi','quadprog']
         self._variables = []
         self._variable_ids = {}
@@ -743,9 +743,11 @@ def main():
     x = QpVariable("x", 0, 3)
     y = QpVariable("y", 0, 1)
     prob += x ** 2 * 2 + y ** 2 * 5 + x + y * 5
-    prob += x + y <= 3
+    prob += y + x <= 3
+    # print(prob.constraints["c0"].toDict())
     prob += x + y >= 2
     prob.solve()
+
     # print(prob.objective)
     # print(prob.solutionTime)
     # print(prob.objective.toDict())

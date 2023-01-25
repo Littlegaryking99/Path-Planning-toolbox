@@ -78,9 +78,17 @@
              
   <section id="initialize-a-qp-problem-by-unisolver">
 <h1>Initialize a QP problem by unisolver<a class="headerlink" href="#initialize-a-qp-problem-by-unisolver" title="Permalink to this headline"></a></h1>
-<p>By import the unisolver model and initialize
-a problem with name and specific solver, a
-QP problem can be initialized:</p>
+<p>To solve a QP problem, user should initialize a model by stating the name of the model and the solver
+they want to use for the model. To get the available solvers of unisolver, user can use <em>listsolver</em>
+function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">unisolver</span><span class="o">.</span><span class="n">listsolver</span><span class="p">()</span>
+<span class="c1">#[&quot;quadprog&quot;, &quot;Gurobi&quot;]</span>
+</pre></div>
+</div>
+<p>By import the unisolver model and acclaiming
+a model with name and specific solver, a
+QP model can be initialized:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
 <span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
 </pre></div>
@@ -91,13 +99,6 @@ automatically named by <strong>NoName</strong>:</p>
 <span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="n">solver</span> <span class="o">=</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
 <span class="n">prob</span><span class="o">.</span><span class="n">name</span>
 <span class="c1"># NoName</span>
-</pre></div>
-</div>
-<p>If the solver is not contained in the unisolver,
-it will print out error message:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
-<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;cvxopt&quot;</span><span class="p">)</span>
-<span class="c1"># This is not a valid solver in unisolver</span>
 </pre></div>
 </div>
 </section>

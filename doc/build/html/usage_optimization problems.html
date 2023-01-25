@@ -43,6 +43,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Optimization problems</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#linear-programming-problems">Linear Programming problems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#quadratic-programming-problems">Quadratic Programming problems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-problem-solvers">Optimization problem solvers</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="usage_installation.html">Installation</a></li>
@@ -104,6 +105,18 @@ programming is a nonlinear programming. It can be written as</p>
 \[\begin{split}minimize \ \ \frac{1}{2}x^TPx &amp;+ q^Tx + r \\
 subject \ to \ \ Gx &amp;\leqslant h\\
             Ax &amp;= b\\\end{split}\]</div>
+</section>
+<section id="optimization-problem-solvers">
+<h2>Optimization problem solvers<a class="headerlink" href="#optimization-problem-solvers" title="Permalink to this headline"></a></h2>
+<p>There are many solvers which are able to solve optimization problems, including <a class="reference external" href="http://cvxopt.org/">CVXOPT</a>,
+<a class="reference external" href="https://web.stanford.edu/~boyd/papers/ecos.html">ECOS</a>, <a class="reference external" href="https://www.gurobi.com/">Gurobi</a>,
+<a class="reference external" href="https://highs.dev/">HiGHS</a>, <a class="reference external" href="https://www.mosek.com/">MOSEK</a>, <a class="reference external" href="https://osqp.org/">OSQP</a>,
+<a class="reference external" href="https://github.com/Simple-Robotics/proxsuite">ProxQP</a>, <a class="reference external" href="https://github.com/coin-or/qpOASES">qpOASES</a>,
+<a class="reference external" href="https://qpswift.github.io/">qpSWIFT</a>, <a class="reference external" href="https://pypi.org/project/quadprog/">quadprog</a>,
+<a class="reference external" href="https://www.cvxgrp.org/scs/">SCS</a>, and so on. Among all these solvers, there are mainly two types.
+The one which is light like quadprog requires standard matrix format of input. These
+solvers always have better performance in executing time. However, for ones which is more mature
+like Gurobi, it can accept constraint input which is more user-frienly.</p>
 </section>
 </section>
 

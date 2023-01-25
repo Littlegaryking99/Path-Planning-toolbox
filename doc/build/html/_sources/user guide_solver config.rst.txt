@@ -6,8 +6,10 @@ they should also state the name and the
 specific solver used in the corresponding QP 
 problem. 
 
+For solver installation, please refer to :doc:`usage_installation`
+
 There are several solvers included in unisolver, user 
-can get the name of solvers like this::
+can get the list of solvers by the following method::
 
     import unisolver
     prob = unisolver.QpProblem()
@@ -21,9 +23,12 @@ it will print out error message::
     prob = unisolver.QpProblem("myProblem", "cvxopt")
     # This is not a valid solver in unisolver
 
-For different solver, the unisolver will  
-accept input in the same format, and adjust
-the input into corresponding format for different 
-solvers.
+For different solvers, they may require different formats of input. However, for some light solvers,
+they do not have detailed documentation, which create barrier for users. Therefore, in unisolver we 
+accept same format of input for every included specific solver. For detailed input format, please refer to 
+:doc:`user guide`.
+
+After user config the solver of the model, they can plug in detailed infomation about the model, for instance,  
+:doc:`user guide_variables`, :doc:`user guide_objective` and :doc:`user guide_constraint`.
 
 

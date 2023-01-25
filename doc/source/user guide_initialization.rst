@@ -1,9 +1,17 @@
 Initialize a QP problem by unisolver
 ====================================
 
-By import the unisolver model and initialize
-a problem with name and specific solver, a 
-QP problem can be initialized::
+To solve a QP problem, user should initialize a model by stating the name of the model and the solver 
+they want to use for the model. To get the available solvers of unisolver, user can use *listsolver* 
+function::
+
+    import unisolver
+    unisolver.listsolver()
+    #["quadprog", "Gurobi"]
+
+By import the unisolver model and acclaiming
+a model with name and specific solver, a 
+QP model can be initialized::
 
     import unisolver
     prob = unisolver.QpProblem("myProblem", "quadprog")
@@ -15,11 +23,4 @@ automatically named by **NoName**::
     prob = unisolver.QpProblem(solver = "quadprog")
     prob.name
     # NoName
-
-If the solver is not contained in the unisolver, 
-it will print out error message::
-
-    import unisolver
-    prob = unisolver.QpProblem("myProblem", "cvxopt")
-    # This is not a valid solver in unisolver
 

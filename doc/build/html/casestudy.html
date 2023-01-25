@@ -15,10 +15,11 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Specify variables for QP problems" href="user%20guide_variables.html" /> 
+    <link rel="prev" title="How to solve the model" href="user%20guide_solve.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -69,13 +70,58 @@
   <section id="case-study">
 <h1>Case Study<a class="headerlink" href="#case-study" title="Permalink to this headline"></a></h1>
 <p>In this section, we are going to show some practical examples</p>
+<p>Control Lyapunov Function (CLF) - Control Barrier
+Function (CBF) - Quadratic Programming (QP) is an
+approach for motion planning. For different
+control input, CLF and CBF constraint may have different relative
+degrees. Although there are no specific Barrier
+function which are suitable for every situations,
+we can somehow use energy-like form to test whether
+it satisfy the requirements of Lyapunov or Barrier function.</p>
+<p>In the following part, we illustrate an example:</p>
+<p>For an adaptive cruise-control problem,
+whose general form of dynamics of the systems are given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{d}{dt} \begin{bmatrix}v \\ d \end{bmatrix} =
+\begin{bmatrix}0 \\ v_0 - v \end{bmatrix} -
+\frac{1}{m} \begin{bmatrix} 1 &amp; v &amp; v^2 \\ 0 &amp; 0 &amp; 0 \end{bmatrix}
+\begin{bmatrix} f_0 \\ f_1 \\ f_2 \end{bmatrix} +
+\begin{bmatrix} \frac{1}{m} \\ 0 \end{bmatrix} u\end{split}\]</div>
+<p><strong>Example 1</strong>:</p>
+<img alt="_images/Ex1.png" src="_images/Ex1.png" />
+<p>We define corresponding parameters:</p>
+<ul class="simple">
+<li><p>State <span class="math notranslate nohighlight">\(x = \begin{bmatrix} p \\ v \\ z \end{bmatrix} \in \mathbb{R}^3\)</span></p></li>
+<li><p>Control input <span class="math notranslate nohighlight">\(u \in \mathbb{R}\)</span></p></li>
+<li><p>Dynamics <span class="math notranslate nohighlight">\(\dot x = \begin{bmatrix} v \\ -\frac{1}{m}F_r(v) \\ v_0 - v\end{bmatrix} + \begin{bmatrix} 0 \\ \frac{1}{m} \\ 0\end{bmatrix}u\)</span>, where <span class="math notranslate nohighlight">\(F_r(v) = f_0 + f_1v  + f_2v^2\)</span> is the resistance.</p></li>
+<li><p>Input constraints <span class="math notranslate nohighlight">\(-mc_dg \leq u \leq mc_ag\)</span></p></li>
+<li><p>Stability objective <span class="math notranslate nohighlight">\(v \to v_d\)</span> (<span class="math notranslate nohighlight">\(v_d\)</span>: desired velocity)</p></li>
+<li><p>Safety objective <span class="math notranslate nohighlight">\(z \geq T_hv\)</span> (<span class="math notranslate nohighlight">\(T_h\)</span>: lookahead time)</p></li>
+<li><p>Lyapunov function <span class="math notranslate nohighlight">\(V(x) =  (v - v_d)^2\)</span></p></li>
+<li><p>CLF constraint <span class="math notranslate nohighlight">\((v - v_d)\{\frac{2}{m}(u - F_r) + \lambda(v - v_d)\} \leq \delta\)</span></p></li>
+<li><p>Barrier function <span class="math notranslate nohighlight">\(h(x) = z - T_hv - \frac{\frac{1}{2}(v-v_0)^2}{c_dg}\)</span></p></li>
+<li><p>CBF constraint <span class="math notranslate nohighlight">\(\frac{1}{m}(T_h + \frac{v - v_0}{c_dg})(F_r(v) - u) + \gamma(v_0 - v + z - T_hv - \frac{(v - v_0)^2}{2c_dg}) \geq 0\)</span></p></li>
+<li><p>QP <span class="math notranslate nohighlight">\(1/2\begin{bmatrix} u \\ \delta \end{bmatrix}^T \begin{bmatrix} \frac{4}{m^2} &amp; 0 \\ 0 &amp; 3\end{bmatrix}\begin{bmatrix} u \\ \delta \end{bmatrix} + \begin{bmatrix} -\frac{2F_r}{m^2} &amp; 0\end{bmatrix}\begin{bmatrix} u \\ \delta \end{bmatrix}\)</span></p></li>
+</ul>
+<p>Then we can set up some initial values of parameters:</p>
+<ul class="simple">
+<li><p>Initial state <span class="math notranslate nohighlight">\(x = \begin{bmatrix} 0 \\ 20 \\ 100 \end{bmatrix}\)</span></p></li>
+<li><p>Lead vehicle velocity <span class="math notranslate nohighlight">\(v_0 = 14\)</span></p></li>
+<li><p>Desired velocity <span class="math notranslate nohighlight">\(v_d  = 24\)</span></p></li>
+<li><p>Weight <span class="math notranslate nohighlight">\(m = 1650\)</span>, <span class="math notranslate nohighlight">\(g = 9.81\)</span></p></li>
+<li><p>Friction <span class="math notranslate nohighlight">\(f_0 = 0.1\)</span>, <span class="math notranslate nohighlight">\(f_1 = 5.0\)</span>, <span class="math notranslate nohighlight">\(f_2 = 0.25\)</span></p></li>
+<li><p>Input constraints <span class="math notranslate nohighlight">\(c_a = 0.3\)</span>, <span class="math notranslate nohighlight">\(c_d = 0.3\)</span></p></li>
+<li><p>Lookahead time <span class="math notranslate nohighlight">\(T_h = 0.8\)</span></p></li>
+<li><p>CLF parameter <span class="math notranslate nohighlight">\(\lambda = 5\)</span></p></li>
+<li><p>CBF parameter <span class="math notranslate nohighlight">\(\gamma = 5\)</span></p></li>
+</ul>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="user%20guide_variables.html" class="btn btn-neutral float-left" title="Specify variables for QP problems" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user%20guide_solve.html" class="btn btn-neutral float-left" title="How to solve the model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

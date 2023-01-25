@@ -84,15 +84,58 @@ specify variables for the model.</p>
 the solver that used to solve the QP, we can
 add variables to the problem.</p>
 <p>There are many ways to define the variables.
-The simplest way is directly specify <strong>QpVariable</strong>
-class:</p>
+The simplest way is directly specify <em>QpVariable</em>
+object:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If lowbound or upbound is not specified, it
-would be initialized by None. And its initial
-value is set to be 0 if not initialized.</p>
+<p>User can also call a list of <em>QpVariable</em> objects by loop definition:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">x_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x_0&#39;</span><span class="p">,</span> <span class="s1">&#39;x_1&#39;</span><span class="p">,</span> <span class="s1">&#39;x_2&#39;</span><span class="p">]</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">QpVariable</span><span class="p">(</span><span class="n">x_name</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>If the name of problem is not specified, it will
+automatically named by <strong>NoName</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="n">lowbound</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upbound</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">name</span>
+<span class="c1">#NoName</span>
+</pre></div>
+</div>
+<p>If lowbound or upbound of the variable is not specified, it
+would be initialized by None. And the initial
+value of the variable is set to be 0 if not
+initialized:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">lowbound</span>
+<span class="c1">#None</span>
+<span class="n">x</span><span class="o">.</span><span class="n">upbound</span>
+<span class="c1">#None</span>
+<span class="n">x</span><span class="o">.</span><span class="n">value</span>
+<span class="c1">#0</span>
+</pre></div>
+</div>
+<p>If user made some mistakes when specifying parameters of <em>QpVariables</em>, they can fix them
+by <em>fixlowbound</em> and <em>fixupbound</em> function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">QpVariable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">lowbound</span>
+<span class="c1">#1</span>
+<span class="n">x</span><span class="o">.</span><span class="n">fixlowbound</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">lowbound</span>
+<span class="c1">#2</span>
+<span class="n">x</span><span class="o">.</span><span class="n">upbound</span>
+<span class="c1">#None</span>
+<span class="n">x</span><span class="o">.</span><span class="n">fixupbound</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">upbound</span>
+<span class="c1">#3</span>
+</pre></div>
+</div>
+<p>After user create the variables of the model, they can set objective function and constraints for
+the model. Please refer to next part for further information.</p>
 </section>
 
 

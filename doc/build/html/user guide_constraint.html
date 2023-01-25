@@ -78,8 +78,11 @@
              
   <section id="how-to-add-a-constraint">
 <h1>How to add a constraint<a class="headerlink" href="#how-to-add-a-constraint" title="Permalink to this headline"></a></h1>
-<p>In this section we will show how to add a constraint to the model.</p>
-<p>In unisolver, we support constraint in
+<p>While objective function is the performance standard of the system,
+in most cases, not every value is applicable for variables. In that case,
+we use constraints to describe which value of variables is applicable.
+In this section we will show how to add constraints to the model.</p>
+<p>In unisolver, we support constraints in
 linear form. By using <strong>+=</strong> to add constraints:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
 <span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
@@ -88,11 +91,28 @@ linear form. By using <strong>+=</strong> to add constraints:</p>
 </div>
 <p>If the right part of <strong>+=</strong> is recognized as
 <strong>QpConstraint</strong>, which means it contains <strong>QpExpression</strong>,
-sign and right hand side constant.</p>
+sign and right hand side constant, then the model will add the constraint.</p>
 <p>When the constraint is added to the model, it will
-automatically given a name <em>ci</em>. Therefore, if
-the contraint is mistakenly input by user, they
-can revise them by the name of constraint.</p>
+automatically given a name <em>ci</em>, where <em>i</em> means this is the ith constraint. Therefore, if
+the contraint is mistakenly input by user, user can modify it by the name of constraint:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="s2">&quot;c0&quot;</span><span class="p">]</span>
+<span class="c1"># x + y &lt;= 3</span>
+</pre></div>
+</div>
+<p>The constraint can also be displayed in the format of a list of dictionary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myProblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">constraints</span><span class="p">[</span><span class="s2">&quot;c0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">toDict</span><span class="p">()</span>
+<span class="c1">#{&#39;constant&#39;: -3, &#39;coefficients&#39;: [{&#39;name&#39;: &#39;y&#39;, &#39;value&#39;: 1}, {&#39;name&#39;: &#39;x&#39;, &#39;value&#39;: 1}]}</span>
+</pre></div>
+</div>
+<p>Therefore, user can modify the constraint by two ways, which is similar to modify the objective function.
+For more details about how to modify objective function, please refer to <a class="reference internal" href="user%20guide_objective.html"><span class="doc">Objective function</span></a>.</p>
+<p>After we input the objectives and contraints, we can solve the model in a very simple way. Please move to next part for further information.</p>
 </section>
 
 

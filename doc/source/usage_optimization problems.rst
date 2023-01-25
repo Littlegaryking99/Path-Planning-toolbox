@@ -30,3 +30,14 @@ programming is a nonlinear programming. It can be written as
     subject \ to \ \ Gx &\leqslant h\\
                 Ax &= b\\
 
+Optimization problem solvers
+------------------------------
+There are many solvers which are able to solve optimization problems, including `CVXOPT <http://cvxopt.org/>`_, 
+`ECOS <https://web.stanford.edu/~boyd/papers/ecos.html>`_, `Gurobi <https://www.gurobi.com/>`_, 
+`HiGHS <https://highs.dev/>`_, `MOSEK <https://www.mosek.com/>`_, `OSQP <https://osqp.org/>`_, 
+`ProxQP <https://github.com/Simple-Robotics/proxsuite>`_, `qpOASES <https://github.com/coin-or/qpOASES>`_,
+`qpSWIFT <https://qpswift.github.io/>`_, `quadprog <https://pypi.org/project/quadprog/>`_, 
+`SCS <https://www.cvxgrp.org/scs/>`_, and so on. Among all these solvers, there are mainly two types. 
+The one which is light like quadprog requires standard matrix format of input. These 
+solvers always have better performance in executing time. However, for ones which is more mature 
+like Gurobi, it can accept constraint input which is more user-frienly.

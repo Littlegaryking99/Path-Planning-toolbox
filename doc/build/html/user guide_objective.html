@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Objective function &mdash; unisolver 0.0.1 documentation</title>
+  <title>How to add objective function &mdash; unisolver 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -43,7 +43,7 @@
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_initialization.html">Initialize a QP problem by unisolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_solver%20config.html">Configure a solver in unisolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_variables.html">Specify variables for QP problems</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Objective function</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How to add objective function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_constraint.html">How to add a constraint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user%20guide_solve.html">How to solve the model</a></li>
 </ul>
@@ -66,7 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a></li>
           <li class="breadcrumb-item"><a href="user%20guide.html">User Guide</a></li>
-      <li class="breadcrumb-item active">Objective function</li>
+      <li class="breadcrumb-item active">How to add objective function</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/user guide_objective.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,21 +76,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="objective-function">
-<h1>Objective function<a class="headerlink" href="#objective-function" title="Permalink to this headline"></a></h1>
+  <section id="how-to-add-objective-function">
+<h1>How to add objective function<a class="headerlink" href="#how-to-add-objective-function" title="Permalink to this headline"></a></h1>
+<p>Objective function of a QP problem is the performance standard of the system.
+And the value of variables which lead to the best performance of objective
+function is the solution of QP problem.</p>
 <p>In this section we will show how to add objective
 function to the QP problem. For linear programming
-problems, the cost function is linear, while for
-QP, the cost function is in quadratic form.</p>
+problems, the objective function is linear, while for
+QP, the objective function is in quadratic form.</p>
 <p>In general, we use <strong>+=</strong> to add objective function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
 <span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myproblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
-<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">objective</span>
+<span class="c1">#x + 2*x**2 + 5*y + 5*y**2</span>
 </pre></div>
 </div>
 <p>The right part of <strong>+=</strong> will be recognized as
-a QpExpression element. And by separating them into
-parts and transform to matrix format.</p>
+a <em>QpExpression</em> object. It can transfer into list of dictionary format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myproblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">toDict</span><span class="p">()</span>
+<span class="c1">#[{&#39;name&#39;: &#39;x**2&#39;, &#39;value&#39;: 2}, {&#39;name&#39;: &#39;y**2&#39;, &#39;value&#39;: 5}, {&#39;name&#39;: &#39;x&#39;, &#39;value&#39;: 1}, {&#39;name&#39;: &#39;y&#39;, &#39;value&#39;: 5}]</span>
+</pre></div>
+</div>
+<p>If user input wrong objective function, they can directly overwrite
+the objective function by <strong>+=</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myproblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">objective</span>
+<span class="c1">#x + 2*x**2 + 5*y + 5*y**2</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="c1">#2*x + 2*x**2 + 5*y + 5*y**2</span>
+</pre></div>
+</div>
+<p>If the objective function not in linear or quadratic form, it will return warning message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unisolver</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">unisolver</span><span class="o">.</span><span class="n">QpProblem</span><span class="p">(</span><span class="s2">&quot;myproblem&quot;</span><span class="p">,</span> <span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+<span class="n">prob</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="c1">#This is not a valid objective function for unisolver</span>
+</pre></div>
+</div>
+<p>After user input correct objective function, they can add contraints and finally solve the model.
+Please refer to next part for further information.</p>
 </section>
 
 
